@@ -12,7 +12,6 @@ USER TABLE STRUCTURE
 - did_redeem_sample : bool
 - did_receive_coupon : bool
 - did_capture_email : bool
-- did_share_to_wall : bool
 
 NOTE : ANY ADDITIONAL FIELDS FOR PII FORM
 ____________________________________________________________________________________________________________
@@ -50,9 +49,8 @@ API CALLS
       else if ({current time} > user.eligible_play_date) {
         - "status" : "contest_eligible" is returned
         
-        // OPTIONAL - These allow people to win more samples, or receive more win chances to enter the contest//
+        // OPTIONAL - This flag would allow people to win more samples//
         - user.did_win_sample = false;
-        - user.did_share_to_wall = false;
         // END OPTIONAL
       }
       else { 
@@ -72,7 +70,7 @@ ________________________________________________________________________________
   
   response params : ```fb_id, win_state```
   
-  ```win_state``` values : ```"user_win", "user_coupon", "gather_email", "request_wall_share", "show_thank_you"```
+  ```win_state``` values : ```"user_win", "user_coupon", "gather_email", "show_thank_you"```
   
   response format : 
 ```json
@@ -110,18 +108,14 @@ ________________________________________________________________________________
       - "outcome" : "user_coupon" is returned  
     }
     else {
-      if ( (user.did_capture_email && user.did_share_to_wall) == true) {
-        // in this state, the user has exhausted their additional chances to enter the contest for the day
+      if (user.did_capture_email == true) {
+        // the user has given their email already and must wait 24 hours to re-enter the contest
         - user.eligible_play_date += 24 hours
         - "outcome" : "show_thank_you" is returned
       }
-      if (user.did_capture_email == false) {
+      else  {
         // in this state, the user can give their email for another chance to enter the contest
         - "outcome" : "gather_email" is returned
-      }
-      else {
-        // in this state, the user can share to their wall for another chance to enter the contest
-        - "outcome" : "request_wall_share" is returned
       }
     }
 ```
@@ -136,7 +130,7 @@ ________________________________________________________________________________
   
   response params : ```fb_id, win_state```
   
-  ```win_state``` values : ```"user_win", "user_coupon", "request_wall_share", "show_thank_you"```
+  ```win_state``` values : ```"user_win", "user_coupon", "show_thank_you"```
   
   response format : 
 ```json
@@ -155,36 +149,6 @@ ________________________________________________________________________________
   - user.did_capture_email = true
   - {RE-ENTER CONTEST FLOW}
 ```
-____________________________________________________________________________________________________________
-------------------------------------------------------------------------------------------------------------
-  
-####```re_enter_contest_from_share```
-  
-  request params : ```fb_id```
-  
-  request format : ```/re_enter_contest_from_share?user=fb_id```
-  
-  response params : ```fb_id, win_state```
-  
-  ```win_state``` values : ```"user_win", "user_coupon", "show_thank_you"```
-  
-  response format : 
-```json
-  {
-      "contest": {
-          "user" : fb_id,
-          "outcome" : win_state
-      }
-  }
-```
-  
-  - If a user has received the "request_wall_share" status in response to a call to "run_contest_for_user", they can use this call to re-enter the contest
-  
-```javascript  
-  - user.did_share_to_wall = true
-  - {RE-ENTER CONTEST API FLOW}
-```
-
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
 
@@ -333,18 +297,6 @@ example responses:
   }
 }
 ```
-
-(nonwinner, submitted email already)
-```json
-{
-  "status_obj": {
-      "user" : 34203086,
-      "status" : "request_wall_share",
-      "giver_id": null
-  }
-}
-```
-  
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
   
