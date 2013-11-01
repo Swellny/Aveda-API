@@ -15,7 +15,6 @@ USER TABLE STRUCTURE
 - did_share_to_wall : bool
 
 NOTE : ANY ADDITIONAL FIELDS FOR PII FORM
-
 ____________________________________________________________________________________________________________
 API CALLS
 ------------------------------------------------------------------------------------------------------------
@@ -24,14 +23,14 @@ API CALLS
 
   request params : ```fb_id```
   
-  request format : ```/check_status_for_user?user=fb_id```
+  request format : ```/check_status_for_user?user=fb_id ```
   
   response params : ```fb_id, user_status, giver_fb_id``` 
   
   ```user_status``` values : ```'contest_eligible', 'contest_ineligible', 'redeem_state'```
   
   response format :
-  ```json
+```json
   {
       "status_obj": {
           "user" : fb_id,
@@ -39,10 +38,11 @@ API CALLS
           "giver_id": giver_fb_id
       }
   }
-  ```
+```
   
   - Upon invoking this call, the database is queried to determine user's eligibility to enter the contest
-  ```javascript      
+
+```javascript      
       if (user.did_win_sample == true && user.did_redeem_sample == false) {
         - "status" : "redeem_state" is returned
         - "giver_id" : user.giver_fb_id is returned
@@ -58,7 +58,7 @@ API CALLS
       else { 
         - "status" : "contest_ineligible" is returned
       }
-  ```    
+```    
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
 
@@ -75,21 +75,21 @@ ________________________________________________________________________________
   ```win_state``` values : ```"user_win", "user_coupon", "gather_email", "request_wall_share", "show_thank_you"```
   
   response format : 
-  ```json
+```json
     {
         "contest_obj": {
             "user" : fb_id,
             "outcome" : win_state
         }
     }
-  ```
+```
   
   - Upon invoking this call, a random number (CONTEST_ENTRY) is generated between 0 and 1
   - win_range is mapped from 0 to an arbitrary value for % chance to win
   - Coupon range is mapped from win_range to an arbitrary value for % chance to win coupon
     - example with 5% win chance, 10% coupon chance
-    
-    ```javascript
+
+```javascript
       CONTEST_ENTRY = arc4_rand(1)
       win_range = (0.0, 0.05)
       coupon_range = (0.05, 0.15)
@@ -124,9 +124,7 @@ ________________________________________________________________________________
         - "outcome" : "request_wall_share" is returned
       }
     }
-    ```
-    
-
+```
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
 
@@ -139,73 +137,84 @@ ________________________________________________________________________________
   response params : ```fb_id, win_state```
   
   ```win_state``` values : ```"user_win", "user_coupon", "request_wall_share", "show_thank_you"```
+  
   response format : 
-  ```json
+```json
   {
       "contest": {
           "user" : fb_id,
           "outcome" : win_state
       }
   }
-  ```
+```
   
   - If a user has received the "gather_email" status in response to a call to "run_contest_for_user", they can use this call to re-enter the contest
 
-  ```javascript
+```javascript
   - user.email = params(email)
   - user.did_capture_email = true
   - {RE-ENTER CONTEST FLOW}
-  ```
-    
-  
+```
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
   
 ####```re_enter_contest_from_share```
   
-  request params : fb_id
-  request format : "/re_enter_contest_from_share?user=fb_id"
+  request params : ```fb_id```
   
-  response params : fb_id, win_state
-  win_state values : "user_win", "user_coupon", "show_thank_you"
+  request format : ```/re_enter_contest_from_share?user=fb_id```
+  
+  response params : ```fb_id, win_state```
+  
+  ```win_state``` values : ```"user_win", "user_coupon", "show_thank_you"```
+  
   response format : 
+```json
   {
       "contest": {
           "user" : fb_id,
           "outcome" : win_state
       }
   }
+```
   
   - If a user has received the "request_wall_share" status in response to a call to "run_contest_for_user", they can use this call to re-enter the contest
   
-  Upon invoking this call,
-    - user.did_share_to_wall = true
-    - {RE-ENTER CONTEST API FLOW}
-  
+```javascript  
+  - user.did_share_to_wall = true
+  - {RE-ENTER CONTEST API FLOW}
+```
+
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
 
 ####```transfer_win_to_user```
   
-  request params : fb_id, recipient_fb_id
-  request format : "/transfer_win_to_user?user=fb_id&recipient=recipient_fb_id"
+  request params : ```fb_id, recipient_fb_id```
   
-  response params : fb_id, recipient_fb_id
-  response format : 
+  request format : ```/transfer_win_to_user?user=fb_id&recipient=recipient_fb_id```
+  
+  response params : ```fb_id, recipient_fb_id```
+  
+  response format :
+```json
   {
       "transfer_win": {
           "user" : fb_id,
           "recipient" : recipient_fb_id
       }
   }
+```
   
   - If a user has received the "user_win" status in response to a call to "run_contest_for_user", they can use this call to give their 'win' to another user
   
-  for clarity,
-    user = facebook user: fb_id
-    recipient = facebook user: recipient_fb_id
+  _for clarity,
+    - ```user``` = facebook user with ID: ```fb_id```
+    - ```recipient``` = facebook user with ID: ```recipient_fb_id```
   
   Upon invoking this call,
+
+```javascript
     // OPTIONAL - if the original user does not receive a sample if they give theirs away, set their 'did_redeem_sample' flag in the database to true
     // otherwise, this user will be allowed to redeem a sample for themselves as well
     - user.did_redeem_sample = true
@@ -213,48 +222,55 @@ ________________________________________________________________________________
     
     - recipient.did_win_sample = true;
     - recipient.did_redeem_sample = false;
-  
+```
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
 
 ####```redeem_sample_for_user```
   
-  request params : fb_id, form_data
-  request format : "/redeem_win_for_user?user=fb_id&formData=form_data"
+  request params : ```fb_id, form_data```
   
-  response params : fb_id, redeem_state, &error
-  redeem_state values : "success", "error"
+  request format : ```/redeem_win_for_user?user=fb_id&formData=form_data```
+  
+  response params : ```fb_id, redeem_state, &error```
+  
+  ```redeem_state``` values : ```"success", "error"```
   response format : 
-  ```{
-      "redeem": {
-          "user": fb_id,
-          "outcome": redeem_state,
-          "error" : &error,
-      }
-  }```
+```json
+  {
+    "redeem": {
+        "user": fb_id,
+        "outcome": redeem_state,
+        "error" : &error,
+    }
+  }
+```
 
   Upon invoking this call,
+```javascript
     if ({no problem with form data, successful submission}){
       - user.did_redeem_sample = true
     }
     else {
       "outcome" : "error"
       "error" : {ERROR FROM SERVER} is returned
-      
     }
-  
+```
 ____________________________________________________________________________________________________________
 SUMMARIZED USE
 ------------------------------------------------------------------------------------------------------------
 
 ####```check_status_for_user```
 
-req: 
+req:
+```
 /check_status_for_user?user=34203086
+```
 
 example responses:
 
 (new user, not gifted)
+```json
 {
   "status_obj": {
       "user" : 34203086,
@@ -262,8 +278,10 @@ example responses:
       "giver_id": null
   }
 }
+```
 
 (user redeeming a gift)
+```json
 {
   "status_obj": {
       "user" : 34203086,
@@ -271,8 +289,10 @@ example responses:
       "giver_id": 09237623
   }
 } 
+```
 
 (returning user, able to participate in contest)
+```json
 {
   "status_obj": {
       "user" : 34203086,
@@ -280,34 +300,42 @@ example responses:
       "giver_id": null
   }
 }
+```
   
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
   
 ####```run_contest_for_user```
 
-req: 
+req:
+```
 /run_contest_for_user?user=34203086
+```
 
 example responses:
 
 (winner)
+```json
 {
   "status_obj": {
       "user" : 34203086,
       "outcome" : "user_win",
   }
 }
+```
 
 (coupon received)
+```json
 {
   "status_obj": {
       "user" : 34203086,
       "outcome" : "user_coupon",
   }
-} 
+}
+```
 
 (nonwinner, submitted email already)
+```json
 {
   "status_obj": {
       "user" : 34203086,
@@ -315,34 +343,39 @@ example responses:
       "giver_id": null
   }
 }
+```
   
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
   
-####```give_win_to_user```
+####```transfer_win_to_user```
 
-req: 
-/give_win_to_user?user=34203086&recipient=34891543
+req:
+```
+/transfer_win_to_user?user=34203086&recipient=34891543
+```
 
 example response:
-
+```json
 {
-    "give_win": {
+    "transfer_win": {
         "user" : 34203086,
         "recipient" : 34891543
     }
 }
-  
+```
 ____________________________________________________________________________________________________________
 ------------------------------------------------------------------------------------------------------------
   
 ####```redeem_sample_for_user```
 
-req: 
+req:
+```
 /redeem_win_for_user?user=34203086&formData={'name':'T Swell', 'address':'77 Franklin St. \n New York, NY 10013'}
+```
 
 response:
-
+```json
 {
       "redeem": {
           "user": 34203086,
@@ -350,12 +383,15 @@ response:
           "error" : null,
       }
 }
-  
-bad req: 
+```
+
+bad req:
+```
 /redeem_win_for_user?user=34203086&formData={'name', 'address':'77 Franklin St. \n New York, NY 10013'}
+```
 
 response:
-
+```json
 {
       "redeem": {
           "user": 34203086,
@@ -363,3 +399,4 @@ response:
           "error" : "INVALID JSON OBJECT",
       }
 }
+```
