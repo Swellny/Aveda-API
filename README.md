@@ -1,4 +1,3 @@
-___
 USER TABLE STRUCTURE
 ---
 
@@ -14,7 +13,7 @@ USER TABLE STRUCTURE
 - did_capture_email : bool
 
 NOTE : ANY ADDITIONAL FIELDS FOR PII FORM
-___
+
 API CALLS
 ---
 
@@ -149,18 +148,18 @@ ___
 ```
 ___
 
-####```transfer_win_to_user```
+####```give_and_get_from_product_win```
   
   request params : ```fb_id, recipient_fb_id```
   
-  request format : ```/transfer_win_to_user?user=fb_id&recipient=recipient_fb_id```
+  request format : ```/give_and_get_from_product_win?user=fb_id&recipient=recipient_fb_id```
   
   response params : ```fb_id, recipient_fb_id```
   
   response format :
 ```json
   {
-      "transfer_win": {
+      "give_and_get_win": {
           "user" : fb_id,
           "recipient" : recipient_fb_id
       }
@@ -176,13 +175,9 @@ ___
   Upon invoking this call,
 
 ```javascript
-    // OPTIONAL - if the original user does not receive a sample if they give theirs away, set their 'did_redeem_sample' flag in the database to true
-    // otherwise, this user will be allowed to redeem a sample for themselves as well
     - user.did_redeem_sample = true
-    // END OPTIONAL
-    
     - recipient.did_win_sample = true;
-    - recipient.did_redeem_sample = false;
+    - recipient.did_redeem_sample = false; // this should be false already from init
 ```
 
 ___
@@ -255,7 +250,7 @@ ___
       "error" : {ERROR FROM SERVER} is returned
     }
 ```
-___
+
 SUMMARIZED USE
 ---
 
@@ -333,6 +328,24 @@ example responses:
 ```
 ___
   
+####```give_and_get_from_product_win```
+
+req:
+```
+/give_and_get_from_product_win?user=34203086&recipient=34891543
+```
+
+example response:
+```json
+{
+    "give_and_get": {
+        "user" : 34203086,
+        "recipient" : 34891543
+    }
+}
+```
+___
+
 ####```transfer_win_to_user```
 
 req:
