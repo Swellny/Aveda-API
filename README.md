@@ -564,7 +564,7 @@ ___
 ```json
 {
   "status_obj": {
-      "user" : 123456,
+      "user" : 555555,
       "outcome" : "user_coupon",
   }
 }
