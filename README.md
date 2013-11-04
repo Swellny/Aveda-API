@@ -1,18 +1,29 @@
 USER TABLE STRUCTURE
 ---
+- APP info and PII can be stored separately, or togther like this.
+- We would need to relate them via ```fb_id``` or email if the information lived in different places
 
+```sql
 + USER
+(APP INFO)
 - fb_id : integer
 - giver_fb_id : integer
-- email : string
-- address : text
-- eligible_play_date : datetime
-- did_win_sample : bool
-- did_redeem_sample : bool
-- did_receive_coupon : bool
-- did_capture_email : bool
+- eligible_play_date : date
+- did_win_sample : boolean
+- did_redeem_sample : boolean
+- did_receive_coupon : boolean
+- did_capture_email : boolean
 
-NOTE : ANY ADDITIONAL FIELDS FOR PII FORM
+(PII)
+- first_name : varchar
+- last_name : varchar
+- email : varchar
+- street : varchar
+- street2 : varchar
+- city: varchar
+- state : varchar
+- zip : integer
+```
 
 API CALLS
 ---
@@ -25,7 +36,7 @@ API CALLS
   
   response params : ```fb_id, user_status, giver_fb_id``` 
   
-  ```user_status``` values : ```'contest_eligible', 'contest_ineligible', 'redeem_state'```
+  ```user_status``` values : ```'contest_eligible', 'contest_ineligible', 'contest_ineligible_winner', 'redeem_state'```
   
   response format :
 ```json
@@ -44,6 +55,9 @@ API CALLS
       if (user.did_win_sample == true && user.did_redeem_sample == false) {
         - "status" : "redeem_state" is returned
         - "giver_id" : user.giver_fb_id is returned
+      }
+      else if (user.did_win_sample == true && user.did_redeem_sample == true) {
+        - "status" : "contest_ineligible_winner" is returned
       }
       else if ({current time} > user.eligible_play_date) {
         - "status" : "contest_eligible" is returned
@@ -397,3 +411,164 @@ response:
       }
 }
 ```
+
+EXAMPLE USER FLOWS
+---
+
+####New user ```123456```, wins contest####
+
+- A new user arrives at the app on facebook and is asked to authorize it to receiver her information
+- The user authorizes the app and the applications grabs her ```fb_id``` of  ```123456```
+- Application calls the server with request : ```/check_status_for_user?user=123456```
+- The server returns : 
+
+```json
+{
+  "status_obj": {
+      "user" : 123456,
+      "status" : "contest_eligible",
+      "giver_id": null
+  }
+}
+```
+
+- User is presented with the visualization for entering the contest
+- User interacts with the contest object
+- The application calls the server with request :```/run_contest_for_user?user=123456```
+- Server determines the user has won and returns :
+
+```json
+{
+  "status_obj": {
+      "user" : 123456,
+      "outcome" : "user_win",
+  }
+}
+```
+- User is then brought to a screen where they can gift the app to a friend, and enter their PII
+- She selects a friend from their list with ```fb_id``` of ```987654```
+- Application calls server with request :```/transfer_win_to_user?user=123456&recipient=987654```
+- Server completes the action of creating/updating user ```987654``` to reflect them having won, and having received the win from user ```123456```
+- User is prompted to enter their information to receive their own sample
+- Application calls server with request :
+
+``` 
+/redeem_win_for_user?user=123456&formData={
+    "first_name": "T",
+    "last_name": "SWELL",
+    "street": "77FranklinSt.",
+    "street2": "groundfloor",
+    "city": "NewYork",
+    "state": "NewYork",
+    "zip": 10013
+}
+```
+- If all data is correctly entered, server responds with :
+
+```json
+{
+      "redeem": {
+          "user": 123456,
+          "outcome": "success",
+          "error" : null,
+      }
+}
+```
+-The user is thanked for participating, and told to enjoy their sample
+___
+
+####Winning user ```123456```, returns to the site####
+
+- The user returns to the app and the applications grabs her ```fb_id``` of  ```123456```
+- Application calls the server with request : ```/check_status_for_user?user=123456```
+- The server returns : 
+
+```json
+{
+  "status_obj": {
+      "user" : 123456,
+      "status" : "contest_ineligible_winner",
+      "giver_id": null
+  }
+}
+```
+___
+
+####User ```987654```, enters to the site, having been gifted a sample####
+
+- The user returns to the app and the applications grabs her ```fb_id``` of  ```987654```
+- Application calls the server with request : ```/check_status_for_user?user=987654```
+- The server returns : 
+
+```json
+{
+  "status_obj": {
+      "user" : 123456,
+      "status" : "redeem_state",
+      "giver_id": null
+  }
+}
+```
+
+- User is prompted to enter their information to receive their sample
+- Application calls server with request :
+
+``` 
+/redeem_win_for_user?user=987654&formData={
+    "first_name": "T",
+    "last_name": "SWELL",
+    "street": "77FranklinSt.",
+    "street2": "groundfloor",
+    "city": "NewYork",
+    "state": "NewYork",
+    "zip": 10013
+}
+```
+- If all data is correctly entered, server responds with :
+
+```json
+{
+      "redeem": {
+          "user": 987654,
+          "outcome": "success",
+          "error" : null,
+      }
+}
+```
+-The user is thanked for participating, and told to enjoy their sample
+
+___
+
+####New user ```555555```, gets coupon####
+
+- A new user arrives at the app on facebook and is asked to authorize it to receiver her information
+- The user authorizes the app and the applications grabs her ```fb_id``` of  ```555555```
+- Application calls the server with request : ```/check_status_for_user?user=555555```
+- The server returns : 
+
+```json
+{
+  "status_obj": {
+      "user" : 555555,
+      "status" : "contest_eligible",
+      "giver_id": null
+  }
+}
+```
+
+- User is presented with the visualization for entering the contest
+- User interacts with the contest object
+- The application calls the server with request :```/run_contest_for_user?user=555555```
+- Server determines the user has won and returns :
+
+```json
+{
+  "status_obj": {
+      "user" : 123456,
+      "outcome" : "user_coupon",
+  }
+}
+```
+- User is then presented with a coupon, and told "thanks for playing, try again tomorrow!"
+
+___
