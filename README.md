@@ -559,7 +559,7 @@ ___
 - User is presented with the visualization for entering the contest
 - User interacts with the contest object
 - The application calls the server with request :```/run_contest_for_user?user=555555```
-- Server determines the user has won and returns :
+- Server determines the user has not won, but can receive a coupon and returns :
 
 ```json
 {
