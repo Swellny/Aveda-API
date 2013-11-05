@@ -82,7 +82,7 @@ ___
   
   response params : ```fb_id, win_state```
   
-  ```win_state``` values : ```"user_win", "user_coupon", "gather_email", "show_thank_you"```
+  ```win_state``` values : ```"user_win", "user_coupon", "gather_email", "user_did_not_win"```
   
   response format : 
 ```json
@@ -123,7 +123,7 @@ ___
       if (user.did_capture_email == true) {
         // the user has given their email already and must wait 24 hours to re-enter the contest
         - user.eligible_play_date += 24 hours
-        - "outcome" : "show_thank_you" is returned
+        - "outcome" : "user_did_not_win" is returned
       }
       else  {
         // in this state, the user can give their email for another chance to enter the contest
@@ -141,7 +141,7 @@ ___
   
   response params : ```fb_id, win_state```
   
-  ```win_state``` values : ```"user_win", "user_coupon", "show_thank_you"```
+  ```win_state``` values : ```"user_win", "user_coupon", "user_did_not_win"```
   
   response format : 
 ```json
@@ -183,8 +183,8 @@ ___
   - If a user has received the "user_win" status in response to a call to "run_contest_for_user", they can use this call to give their 'win' to another user
   
   _for clarity,
-    - ```user``` = facebook user with ID: ```fb_id```
-    - ```recipient``` = facebook user with ID: ```recipient_fb_id```
+     ```user``` = facebook user with ID: ```fb_id```
+     ```recipient``` = facebook user with ID: ```recipient_fb_id```
   
   Upon invoking this call,
 
@@ -196,43 +196,7 @@ ___
 
 ___
 
-####```transfer_win_to_user```
-  
-  request params : ```fb_id, recipient_fb_id```
-  
-  request format : ```/transfer_win_to_user?user=fb_id&recipient=recipient_fb_id```
-  
-  response params : ```fb_id, recipient_fb_id```
-  
-  response format :
-```json
-  {
-      "transfer_win": {
-          "user" : fb_id,
-          "recipient" : recipient_fb_id
-      }
-  }
-```
-  
-  - If a user has received the "user_win" status in response to a call to "run_contest_for_user", they can use this call to give their 'win' to another user
-  
-  _for clarity,
-    - ```user``` = facebook user with ID: ```fb_id```
-    - ```recipient``` = facebook user with ID: ```recipient_fb_id```
-  
-  Upon invoking this call,
 
-```javascript
-    // OPTIONAL - if the original user does not receive a sample if they give theirs away, set their 'did_redeem_sample' flag in the database to true
-    // otherwise, this user will be allowed to redeem a sample for themselves as well
-    - user.did_redeem_sample = true
-    // END OPTIONAL
-    
-    - recipient.did_win_sample = true;
-    - recipient.did_redeem_sample = false;
-```
-
-___
 
 ####```redeem_sample_for_user```
   
@@ -359,24 +323,6 @@ example response:
 }
 ```
 ___
-
-####```transfer_win_to_user```
-
-req:
-```
-/transfer_win_to_user?user=34203086&recipient=34891543
-```
-
-example response:
-```json
-{
-    "transfer_win": {
-        "user" : 34203086,
-        "recipient" : 34891543
-    }
-}
-```
-___
   
 ####```redeem_sample_for_user```
 
@@ -447,7 +393,7 @@ EXAMPLE USER FLOWS
 ```
 - User is then brought to a screen where they can gift the app to a friend, and enter their PII
 - She selects a friend from their list with ```fb_id``` of ```987654```
-- Application calls server with request :```/transfer_win_to_user?user=123456&recipient=987654```
+- Application calls server with request :```/give_and_get_from_product_win?user=123456&recipient=987654```
 - Server completes the action of creating/updating user ```987654``` to reflect them having won, and having received the win from user ```123456```
 - User is prompted to enter their information to receive their own sample
 - Application calls server with request :
