@@ -42,7 +42,7 @@ get '/run_contest_for_user' do
 		end
 
 	content_type :json
-  { :contest_obj => {:user=> params[:user], :outcome=>winParam}.to_json
+  { :contest_obj => {:user=> params[:user], :outcome=>winParam}}.to_json
 
 end
 
@@ -58,13 +58,13 @@ get '/re_enter_contest_with_email' do
 		end
 
 	content_type :json
-  { :contest_obj => {:user=> params[:user], :outcome=>winParam}.to_json
+  { :contest_obj => {:user=> params[:user], :outcome=>winParam}}.to_json
 
 end
 
 get '/give_and_get_from_product_win' do
 	 content_type :json
-  { :give_and_get_win => {:user=> params[:user], :recipient=>453945234}.to_json
+  { :give_and_get_win => {:user=> params[:user], :recipient=>453945234}}.to_json
 end
 
 get '/redeem_sample_for_user' do
@@ -72,6 +72,6 @@ get '/redeem_sample_for_user' do
 	outcome = 'success'
 	error = "ERROR DOES NOT COMPUTE" && outcome = "error" unless params[:error] == nil
 	 content_type :json
-  { :give_and_get_win => {:user=> params[:user], :outcome=>outcome, :error=>error}.to_json
+  { :give_and_get_win => {:user=> params[:user], :outcome=>outcome, :error=>error}}.to_json
 end
 
