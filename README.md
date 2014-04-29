@@ -449,9 +449,9 @@ ___
 ```json
 {
   "status_obj": {
-      "user" : 123456,
+      "user" : 987654,
       "status" : "redeem_state",
-      "giver_id": null
+      "giver_id": 123456
   }
 }
 ```
